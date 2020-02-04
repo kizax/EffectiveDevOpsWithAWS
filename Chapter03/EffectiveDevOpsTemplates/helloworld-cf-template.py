@@ -19,7 +19,7 @@ PublicCidrIp = str(ip_network(get_ip()))
 
 t = Template()
 
-t.add_description("Effective DevOps in AWS: HelloWorld web application")
+t.set_description("Effective DevOps in AWS: HelloWorld web application")
 
 t.add_parameter(Parameter(
     "KeyPair",

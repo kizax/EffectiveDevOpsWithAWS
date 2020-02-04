@@ -1,1 +1,2 @@
-ipify==1.0.0
+ipify>=1.0,<1.1
+troposphere>=2.5,<2.6
