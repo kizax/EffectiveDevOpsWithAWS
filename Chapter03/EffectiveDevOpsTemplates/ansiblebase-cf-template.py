@@ -21,7 +21,7 @@ GithubAccount = "kizax"
 GithubAnsibleURL = "https://github.com/{}/EffectiveDevOpsWithAWS".format(GithubAccount)
 
 AnsiblePullCmd = \
-    "/usr/local/bin/ansible-pull -U {}/master/Chapter03/ansible/{}.yml -i localhost".format(
+    "/usr/local/bin/ansible-pull -U {} Chapter03/ansible/{}.yml -i localhost".format(
         GithubAnsibleURL,
         ApplicationName
     )
