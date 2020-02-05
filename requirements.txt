@@ -2,4 +2,5 @@ ipify>=1.0,<1.1
 troposphere>=2.5,<2.6
 ansible>=2.9,<2.10
 paramiko>=2.7,<2.8
-
+boto>=2.49,<2.50
+boto3>=1.11,<1.12
