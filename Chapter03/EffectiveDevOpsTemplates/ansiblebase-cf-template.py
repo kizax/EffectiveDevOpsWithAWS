@@ -17,11 +17,11 @@ from troposphere import (
 ApplicationName = "helloworld"
 ApplicationPort = "3000"
 
-GithubAccount = "EffectiveDevOpsWithAWS"
-GithubAnsibleURL = "https://github.com/{}/ansible".format(GithubAccount)
+GithubAccount = "kizax"
+GithubAnsibleURL = "https://github.com/{}/EffectiveDevOpsWithAWS".format(GithubAccount)
 
 AnsiblePullCmd = \
-    "/usr/local/bin/ansible-pull -U {} {}.yml -i localhost".format(
+    "/usr/local/bin/ansible-pull -U {}/master/Chapter03/ansible/{}.yml -i localhost".format(
         GithubAnsibleURL,
         ApplicationName
     )
@@ -30,7 +30,7 @@ PublicCidrIp = str(ip_network(get_ip()))
 
 t = Template()
 
-t.add_description("Effective DevOps in AWS: HelloWorld web application")
+t.set_description("Effective DevOps in AWS: HelloWorld web application")
 
 t.add_parameter(Parameter(
     "KeyPair",
