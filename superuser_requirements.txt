@@ -1,0 +1,3 @@
+# the following packages is needed to be installed in root
+boto>=2.49,<2.50
+ansible>=2.9,<2.10
