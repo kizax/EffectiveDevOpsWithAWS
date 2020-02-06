@@ -33,11 +33,11 @@ from awacs.sts import AssumeRole
 ApplicationName = "jenkins"
 ApplicationPort = "8080"
 
-GithubAccount = "EffectiveDevOpsWithAWS"
-GithubAnsibleURL = "https://github.com/{}/ansible".format(GithubAccount)
+GithubAccount = "kizax"
+GithubAnsibleURL = "https://github.com/{}/EffectiveDevOpsWithAWS".format(GithubAccount)
 
 AnsiblePullCmd = \
-    "/usr/local/bin/ansible-pull -U {} {}.yml -i localhost".format(
+    "/usr/local/bin/ansible-pull -U {} Chapter04/ansible/{}.yml -i localhost".format(
         GithubAnsibleURL,
         ApplicationName
     )
@@ -46,7 +46,7 @@ PublicCidrIp = str(ip_network(get_ip()))
 
 t = Template()
 
-t.add_description("Effective DevOps in AWS: HelloWorld web application")
+t.set_description("Effective DevOps in AWS: HelloWorld web application")
 
 t.add_parameter(Parameter(
     "KeyPair",
@@ -79,7 +79,7 @@ ud = Base64(Join('\n', [
     "yum install --enablerepo=epel -y git",
     "pip install ansible",
     AnsiblePullCmd,
-    "echo '*/10 * * * * {}' > /etc/cron.d/ansible-pull".format(AnsiblePullCmd)
+    "echo '*/10 * * * * ec2-user {}' > /etc/cron.d/ansible-pull".format(AnsiblePullCmd)
 ]))
 
 t.add_resource(Role(
@@ -103,7 +103,7 @@ t.add_resource(InstanceProfile(
 
 t.add_resource(ec2.Instance(
     "instance",
-    ImageId="ami-a4c7edb2",
+    ImageId="ami-a0cfeed8",
     InstanceType="t2.micro",
     SecurityGroups=[Ref("SecurityGroup")],
     KeyName=Ref("KeyPair"),
@@ -126,4 +126,4 @@ t.add_output(Output(
     ]),
 ))
 
-print t.to_json()
+print(t.to_json())

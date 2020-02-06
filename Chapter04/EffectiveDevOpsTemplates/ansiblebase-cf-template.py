@@ -30,7 +30,7 @@ PublicCidrIp = str(ip_network(get_ip()))
 
 t = Template()
 
-t.add_description("Effective DevOps in AWS: HelloWorld web application")
+t.set_description("Effective DevOps in AWS: HelloWorld web application")
 
 t.add_parameter(Parameter(
     "KeyPair",
@@ -68,7 +68,7 @@ ud = Base64(Join('\n', [
 
 t.add_resource(ec2.Instance(
     "instance",
-    ImageId="ami-a4c7edb2",
+    ImageId="ami-a0cfeed8",
     InstanceType="t2.micro",
     SecurityGroups=[Ref("SecurityGroup")],
     KeyName=Ref("KeyPair"),
@@ -90,4 +90,4 @@ t.add_output(Output(
     ]),
 ))
 
-print t.to_json()
+print(t.to_json())
