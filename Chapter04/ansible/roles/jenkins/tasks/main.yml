@@ -1,27 +1,49 @@
 ---
 # tasks file for jenkins
 
-- name: Import Jenkins GPG key 
-  rpm_key:  
-    state: present 
-    key: http://pkg.jenkins-ci.org/redhat/jenkins-ci.org.key 
+- name: Install git
+  apt:
+    name: git
+    state: present
+    update_cache: yes
 
-- name: Add Jenkins repository 
-  yum_repository: 
-    name: jenkins 
-    description: jenkins repository 
-    baseurl: http://pkg.jenkins.io/redhat 
-    enabled: no 
-    gpgcheck: yes 
+- name: Install Java 8 using YUM.
+  yum:
+    name: "{{java.VERSION}}"
+    state: latest
+  become: true
 
-- name: Install Jenkins 
-  yum: 
-    name: jenkins-2.45
-    enablerepo: jenkins 
-    state: present 
+- name: Correct the alternatives to change default Java version.
+  alternatives:
+    name: java
+    link: /bin/java
+    path: "{{java.ALTERNATIVES}}"
 
-- name: Start Jenkins 
-  service: 
-    name: jenkins 
-    enabled: yes 
-    state: started 
+- name: Download Jenkins repo yum URL for
+  get_url:
+    url: "{{jenkins.repo_URL}}"
+    dest: /etc/yum.repos.d/jenkins.repo
+  become: true
+
+- name: Import GPG Key
+  rpm_key:
+    state: present
+    key: "{{jenkins.gpg_key}}"
+
+- name: Install Jenkins
+  yum:
+    name: jenkins
+    state: present
+
+- name: Change Jenkins JAVA options
+  lineinfile:
+    dest=/etc/sysconfig/jenkins
+    regexp=^JENKINS_JAVA_OPTIONS=
+    line=JENKINS_JAVA_OPTIONS="{{ jenkins.JAVA_OPTIONS }}"
+  become: true
+
+- name: Start Jenkins service and enable on boot
+  service:
+    name: jenkins
+    state: started
+    enabled: yes
