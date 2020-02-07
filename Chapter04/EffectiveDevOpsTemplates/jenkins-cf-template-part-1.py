@@ -76,6 +76,7 @@ t.add_resource(ec2.SecurityGroup(
 
 ud = Base64(Join('\n', [
     "#!/bin/bash",
+    "sudo yum install --enablerepo=epel -y git",
     "pip install ansible",
     AnsiblePullCmd
 ]))

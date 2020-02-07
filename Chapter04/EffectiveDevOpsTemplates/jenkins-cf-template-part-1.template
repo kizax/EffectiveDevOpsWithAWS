@@ -110,6 +110,7 @@
                             "\n",
                             [
                                 "#!/bin/bash",
+                                "sudo yum install --enablerepo=epel -y git",
                                 "pip install ansible",
                                 "/usr/local/bin/ansible-pull -U https://github.com/kizax/EffectiveDevOpsWithAWS Chapter04/ansible/jenkins.yml -i localhost"
                             ]
