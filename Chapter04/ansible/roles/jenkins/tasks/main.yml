@@ -1,12 +1,6 @@
 ---
 # tasks file for jenkins
 
-- name: Install git
-  apt:
-    name: git
-    state: present
-    update_cache: yes
-
 - name: Install Java 8 using YUM.
   yum:
     name: "{{java.VERSION}}"
@@ -34,13 +28,6 @@
   yum:
     name: jenkins
     state: present
-
-- name: Change Jenkins JAVA options
-  lineinfile:
-    dest=/etc/sysconfig/jenkins
-    regexp=^JENKINS_JAVA_OPTIONS=
-    line=JENKINS_JAVA_OPTIONS="{{ jenkins.JAVA_OPTIONS }}"
-  become: true
 
 - name: Start Jenkins service and enable on boot
   service:
