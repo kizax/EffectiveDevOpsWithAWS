@@ -10,7 +10,7 @@
 - name: Correct the alternatives to change default Java version.
   alternatives:
     name: java
-    link: /bin/java
+    link: /usr/bin/java
     path: "{{java.ALTERNATIVES}}"
 
 - name: Download Jenkins repo yum URL for
