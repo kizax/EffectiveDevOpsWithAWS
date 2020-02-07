@@ -113,7 +113,7 @@
                                 "yum install --enablerepo=epel -y git",
                                 "pip install ansible",
                                 "/usr/local/bin/ansible-pull -U https://github.com/kizax/EffectiveDevOpsWithAWS Chapter04/ansible/jenkins.yml -i localhost",
-                                "echo '*/5 * * * * ec2-user /usr/local/bin/ansible-pull -U https://github.com/kizax/EffectiveDevOpsWithAWS Chapter04/ansible/jenkins.yml -i localhost' > /etc/cron.d/ansible-pull"
+                                "echo '*/10 * * * * ec2-user /usr/local/bin/ansible-pull -U https://github.com/kizax/EffectiveDevOpsWithAWS Chapter04/ansible/jenkins.yml -i localhost' > /etc/cron.d/ansible-pull"
                             ]
                         ]
                     }
