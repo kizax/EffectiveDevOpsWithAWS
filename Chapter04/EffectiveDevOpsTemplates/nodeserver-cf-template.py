@@ -34,10 +34,10 @@ ApplicationName = "nodeserver"
 ApplicationPort = "3000"
 
 GithubAccount = "EffectiveDevOpsWithAWS"
-GithubAnsibleURL = "https://github.com/{}/ansible".format(GithubAccount)
+GithubAnsibleURL = "https://github.com/{}//EffectiveDevOpsWithAWS".format(GithubAccount)
 
 AnsiblePullCmd = \
-    "/usr/local/bin/ansible-pull -U {} {}.yml -i localhost".format(
+    "/usr/local/bin/ansible-pull -U {} Chapter04/ansible/{}.yml -i localhost".format(
         GithubAnsibleURL,
         ApplicationName
     )
@@ -76,10 +76,9 @@ t.add_resource(ec2.SecurityGroup(
 
 ud = Base64(Join('\n', [
     "#!/bin/bash",
-    "yum install --enablerepo=epel -y git",
+    "sudo yum install --enablerepo=epel -y git",
     "pip install ansible",
-    AnsiblePullCmd,
-    "echo '*/10 * * * * {}' > /etc/cron.d/ansible-pull".format(AnsiblePullCmd)
+    AnsiblePullCmd
 ]))
 
 t.add_resource(Role(
@@ -98,6 +97,20 @@ t.add_resource(Role(
 t.add_resource(InstanceProfile(
     "InstanceProfile",
     Path="/",
+    Roles=[Ref("Role")]
+))
+
+t.add_resource(IAMPolicy(
+    "Policy",
+    PolicyName="AllowS3",
+    PolicyDocument=Policy(
+        Statement=[
+            Statement(
+                Effect=Allow,
+                Action=[Action("s3", "*")],
+                Resource=["*"])
+        ]
+    ),
     Roles=[Ref("Role")]
 ))
 
