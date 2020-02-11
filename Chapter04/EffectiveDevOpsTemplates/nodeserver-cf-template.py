@@ -33,7 +33,7 @@ from awacs.sts import AssumeRole
 ApplicationName = "nodeserver"
 ApplicationPort = "3000"
 
-GithubAccount = "EffectiveDevOpsWithAWS"
+GithubAccount = "kizax"
 GithubAnsibleURL = "https://github.com/{}/EffectiveDevOpsWithAWS".format(GithubAccount)
 
 AnsiblePullCmd = \
