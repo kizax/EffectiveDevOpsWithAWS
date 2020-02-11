@@ -34,7 +34,7 @@ ApplicationName = "nodeserver"
 ApplicationPort = "3000"
 
 GithubAccount = "EffectiveDevOpsWithAWS"
-GithubAnsibleURL = "https://github.com/{}//EffectiveDevOpsWithAWS".format(GithubAccount)
+GithubAnsibleURL = "https://github.com/{}/EffectiveDevOpsWithAWS".format(GithubAccount)
 
 AnsiblePullCmd = \
     "/usr/local/bin/ansible-pull -U {} Chapter04/ansible/{}.yml -i localhost".format(
