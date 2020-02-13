@@ -80,7 +80,7 @@
                                                 }
                                             ]
                                         },
-                                        "alb-target-group"
+                                        "alb-helloworld-target-group"
                                     ]
                                 ]
                             }

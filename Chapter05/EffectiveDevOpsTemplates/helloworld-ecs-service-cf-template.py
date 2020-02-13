@@ -2,9 +2,7 @@
 
 from troposphere.ecs import (
     TaskDefinition,
-    ContainerDefinition,
-    LogConfiguration,
-    Environment,
+    ContainerDefinition
 )
 from troposphere import ecs
 from awacs.aws import (
@@ -55,7 +53,7 @@ t.add_resource(TaskDefinition(
             Cpu=256,
             Name="helloworld",
             PortMappings=[ecs.PortMapping(
-                ContainerPort=3000)],
+                ContainerPort=3000)]
         )
     ],
 ))
@@ -94,7 +92,7 @@ t.add_resource(ecs.Service(
             Join(
                 "-",
                 [Select(0, Split("-", Ref("AWS::StackName"))),
-                    "alb-target-group"]
+                    "alb-helloworld-target-group"]
             ),
         ),
     )],
