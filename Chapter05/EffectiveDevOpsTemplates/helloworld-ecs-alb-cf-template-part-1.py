@@ -29,11 +29,6 @@ t = Template()
 
 t.set_description("Effective DevOps in AWS: ALB for the ECS Cluster")
 
-t.add_resource(Bucket(
-    "S3Bucket",
-    DeletionPolicy="Retain",
-))
-
 t.add_resource(ec2.SecurityGroup(
     "LoadBalancerSecurityGroup",
     GroupDescription="Web load balancer security group.",
