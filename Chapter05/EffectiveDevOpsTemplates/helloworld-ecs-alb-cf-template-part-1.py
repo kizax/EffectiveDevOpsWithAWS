@@ -67,16 +67,6 @@ t.add_resource(elb.LoadBalancer(
         )
     ),
     SecurityGroups=[Ref("LoadBalancerSecurityGroup")],
-    LoadBalancerAttributes=[
-        elb.LoadBalancerAttributes(
-            Key="access_logs.s3.enabled",
-            Value="true",
-        ),
-        elb.LoadBalancerAttributes(
-            Key="access_logs.s3.bucket",
-            Value=Ref("S3Bucket"),
-        )
-    ],
 ))
 
 t.add_resource(elb.TargetGroup(
