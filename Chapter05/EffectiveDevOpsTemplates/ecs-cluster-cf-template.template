@@ -1,0 +1,324 @@
+{
+    "Description": "Effective DevOps in AWS: ECS Cluster",
+    "Outputs": {
+        "Cluster": {
+            "Description": "ECS Cluster Name",
+            "Export": {
+                "Name": {
+                    "Fn::Sub": "${AWS::StackName}-id"
+                }
+            },
+            "Value": {
+                "Ref": "ECSCluster"
+            }
+        },
+        "PublicSubnet": {
+            "Description": "PublicSubnet",
+            "Export": {
+                "Name": {
+                    "Fn::Sub": "${AWS::StackName}-public-subnets"
+                }
+            },
+            "Value": {
+                "Fn::Join": [
+                    ",",
+                    {
+                        "Ref": "PublicSubnet"
+                    }
+                ]
+            }
+        },
+        "VpcId": {
+            "Description": "VpcId",
+            "Export": {
+                "Name": {
+                    "Fn::Sub": "${AWS::StackName}-vpc-id"
+                }
+            },
+            "Value": {
+                "Ref": "VpcId"
+            }
+        }
+    },
+    "Parameters": {
+        "KeyPair": {
+            "ConstraintDescription": "must be the name of an existing EC2 KeyPair.",
+            "Description": "Name of an existing EC2 KeyPair to SSH",
+            "Type": "AWS::EC2::KeyPair::KeyName"
+        },
+        "PublicSubnet": {
+            "ConstraintDescription": "PublicSubnet",
+            "Description": "PublicSubnet",
+            "Type": "List<AWS::EC2::Subnet::Id>"
+        },
+        "VpcId": {
+            "Description": "VPC",
+            "Type": "AWS::EC2::VPC::Id"
+        }
+    },
+    "Resources": {
+        "CPUReservationTooHigh": {
+            "Properties": {
+                "AlarmActions": [
+                    {
+                        "Ref": "ScaleUpPolicyForCPU"
+                    }
+                ],
+                "AlarmDescription": "Alarm if CPU reservation too High",
+                "ComparisonOperator": "GreaterThanThreshold",
+                "Dimensions": [
+                    {
+                        "Name": "ClusterName",
+                        "Value": {
+                            "Ref": "ECSCluster"
+                        }
+                    }
+                ],
+                "EvaluationPeriods": "1",
+                "MetricName": "CPUReservation",
+                "Namespace": "AWS/ECS",
+                "Period": "60",
+                "Statistic": "Average",
+                "Threshold": "75"
+            },
+            "Type": "AWS::CloudWatch::Alarm"
+        },
+        "CPUReservationTooLow": {
+            "Properties": {
+                "AlarmActions": [
+                    {
+                        "Ref": "ScaleDownPolicyForCPU"
+                    }
+                ],
+                "AlarmDescription": "Alarm if CPU reservation too Low",
+                "ComparisonOperator": "LessThanThreshold",
+                "Dimensions": [
+                    {
+                        "Name": "ClusterName",
+                        "Value": {
+                            "Ref": "ECSCluster"
+                        }
+                    }
+                ],
+                "EvaluationPeriods": "1",
+                "MetricName": "CPUReservation",
+                "Namespace": "AWS/ECS",
+                "Period": "60",
+                "Statistic": "Average",
+                "Threshold": "30"
+            },
+            "Type": "AWS::CloudWatch::Alarm"
+        },
+        "ContainerInstances": {
+            "Properties": {
+                "AssociatePublicIpAddress": "true",
+                "IamInstanceProfile": {
+                    "Ref": "EC2InstanceProfile"
+                },
+                "ImageId": "ami-04351e12",
+                "InstanceType": "t2.micro",
+                "KeyName": {
+                    "Ref": "KeyPair"
+                },
+                "SecurityGroups": [
+                    {
+                        "Ref": "SecurityGroup"
+                    }
+                ],
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#!/bin/bash -xe\n",
+                                "echo ECS_CLUSTER=",
+                                {
+                                    "Ref": "ECSCluster"
+                                },
+                                " >> /etc/ecs/ecs.config\n",
+                                "yum install -y aws-cfn-bootstrap\n",
+                                "/opt/aws/bin/cfn-signal -e $? ",
+                                "         --stack ",
+                                {
+                                    "Ref": "AWS::StackName"
+                                },
+                                "         --resource ECSAutoScalingGroup ",
+                                "         --region ",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                "\n"
+                            ]
+                        ]
+                    }
+                }
+            },
+            "Type": "AWS::AutoScaling::LaunchConfiguration"
+        },
+        "EC2InstanceProfile": {
+            "Properties": {
+                "Roles": [
+                    {
+                        "Ref": "EcsClusterRole"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::InstanceProfile"
+        },
+        "ECSAutoScalingGroup": {
+            "Properties": {
+                "DesiredCapacity": "1",
+                "LaunchConfigurationName": {
+                    "Ref": "ContainerInstances"
+                },
+                "MaxSize": "5",
+                "MinSize": "1",
+                "VPCZoneIdentifier": {
+                    "Ref": "PublicSubnet"
+                }
+            },
+            "Type": "AWS::AutoScaling::AutoScalingGroup"
+        },
+        "ECSCluster": {
+            "Type": "AWS::ECS::Cluster"
+        },
+        "EcsClusterRole": {
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": "ec2.amazonaws.com"
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns": [
+                    "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM",
+                    "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
+                    "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role",
+                    "arn:aws:iam::aws:policy/CloudWatchFullAccess"
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "MemoryReservationTooHigh": {
+            "Properties": {
+                "AlarmActions": [
+                    {
+                        "Ref": "ScaleUpPolicyForMemory"
+                    }
+                ],
+                "AlarmDescription": "Alarm if Memory reservation too High",
+                "ComparisonOperator": "GreaterThanThreshold",
+                "Dimensions": [
+                    {
+                        "Name": "ClusterName",
+                        "Value": {
+                            "Ref": "ECSCluster"
+                        }
+                    }
+                ],
+                "EvaluationPeriods": "1",
+                "MetricName": "MemoryReservation",
+                "Namespace": "AWS/ECS",
+                "Period": "60",
+                "Statistic": "Average",
+                "Threshold": "75"
+            },
+            "Type": "AWS::CloudWatch::Alarm"
+        },
+        "MemoryReservationTooLow": {
+            "Properties": {
+                "AlarmActions": [
+                    {
+                        "Ref": "ScaleDownPolicyForMemory"
+                    }
+                ],
+                "AlarmDescription": "Alarm if Memory reservation too Low",
+                "ComparisonOperator": "LessThanThreshold",
+                "Dimensions": [
+                    {
+                        "Name": "ClusterName",
+                        "Value": {
+                            "Ref": "ECSCluster"
+                        }
+                    }
+                ],
+                "EvaluationPeriods": "1",
+                "MetricName": "MemoryReservation",
+                "Namespace": "AWS/ECS",
+                "Period": "60",
+                "Statistic": "Average",
+                "Threshold": "30"
+            },
+            "Type": "AWS::CloudWatch::Alarm"
+        },
+        "ScaleDownPolicyForCPU": {
+            "Properties": {
+                "AdjustmentType": "ChangeInCapacity",
+                "AutoScalingGroupName": {
+                    "Ref": "ECSAutoScalingGroup"
+                },
+                "ScalingAdjustment": "-1"
+            },
+            "Type": "AWS::AutoScaling::ScalingPolicy"
+        },
+        "ScaleDownPolicyForMemory": {
+            "Properties": {
+                "AdjustmentType": "ChangeInCapacity",
+                "AutoScalingGroupName": {
+                    "Ref": "ECSAutoScalingGroup"
+                },
+                "ScalingAdjustment": "-1"
+            },
+            "Type": "AWS::AutoScaling::ScalingPolicy"
+        },
+        "ScaleUpPolicyForCPU": {
+            "Properties": {
+                "AdjustmentType": "ChangeInCapacity",
+                "AutoScalingGroupName": {
+                    "Ref": "ECSAutoScalingGroup"
+                },
+                "ScalingAdjustment": "1"
+            },
+            "Type": "AWS::AutoScaling::ScalingPolicy"
+        },
+        "ScaleUpPolicyForMemory": {
+            "Properties": {
+                "AdjustmentType": "ChangeInCapacity",
+                "AutoScalingGroupName": {
+                    "Ref": "ECSAutoScalingGroup"
+                },
+                "ScalingAdjustment": "1"
+            },
+            "Type": "AWS::AutoScaling::ScalingPolicy"
+        },
+        "SecurityGroup": {
+            "Properties": {
+                "GroupDescription": "Allow SSH and private network access",
+                "SecurityGroupIngress": [
+                    {
+                        "CidrIp": "172.16.0.0/12",
+                        "FromPort": 0,
+                        "IpProtocol": "tcp",
+                        "ToPort": 65535
+                    },
+                    {
+                        "CidrIp": "122.117.59.145/32",
+                        "FromPort": "22",
+                        "IpProtocol": "tcp",
+                        "ToPort": "22"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "VpcId"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroup"
+        }
+    }
+}
