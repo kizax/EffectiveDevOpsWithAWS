@@ -29,7 +29,7 @@ from troposphere.ec2 import (
 
 t = Template()
 
-t.add_description("Effective DevOps in AWS: VPC, public and private subnets")
+t.set_description("Effective DevOps in AWS: VPC, public and private subnets")
 
 t.add_parameter(Parameter(
     "ClassB",

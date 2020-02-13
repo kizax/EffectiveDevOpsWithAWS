@@ -28,7 +28,7 @@ from troposphere.s3 import Bucket, VersioningConfiguration
 
 t = Template()
 
-t.add_description("Effective DevOps in AWS: Helloworld Pipeline")
+t.set_description("Effective DevOps in AWS: Helloworld Pipeline")
 
 t.add_resource(Bucket(
     "S3Bucket",

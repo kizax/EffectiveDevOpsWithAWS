@@ -10,7 +10,7 @@ from troposphere.iam import (
 
 t = Template()
 
-t.add_description("Effective DevOps in AWS: User Groups")
+t.set_description("Effective DevOps in AWS: User Groups")
 
 t.add_resource(Group(
     "Admins",
@@ -20,4 +20,4 @@ t.add_resource(Group(
     ],
 ))
 
-print t.to_json()
+print(t.to_json())

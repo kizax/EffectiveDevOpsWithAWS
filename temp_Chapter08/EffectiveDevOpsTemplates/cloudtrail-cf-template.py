@@ -16,7 +16,7 @@ from troposphere.cloudtrail import Trail
 
 t = Template()
 
-t.add_description("Effective DevOps in AWS: Turn on CloudTrail and log to S3")
+t.set_description("Effective DevOps in AWS: Turn on CloudTrail and log to S3")
 
 t.add_resource(Bucket(
     "S3Bucket",

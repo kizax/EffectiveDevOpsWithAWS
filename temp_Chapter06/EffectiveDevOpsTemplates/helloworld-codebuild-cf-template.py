@@ -25,7 +25,7 @@ from troposphere.iam import Role
 
 t = Template()
 
-t.add_description("Effective DevOps in AWS: CodeBuild - Helloworld container")
+t.set_description("Effective DevOps in AWS: CodeBuild - Helloworld container")
 
 t.add_resource(Role(
     "ServiceRole",

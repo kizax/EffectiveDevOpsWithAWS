@@ -1,0 +1,40 @@
+{
+    "Description": "Effective DevOps in AWS: ECR Repository",
+    "Outputs": {
+        "Repository": {
+            "Description": "ECR repository",
+            "Export": {
+                "Name": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            {
+                                "Ref": "RepoName"
+                            },
+                            "repo"
+                        ]
+                    ]
+                }
+            },
+            "Value": {
+                "Ref": "RepoName"
+            }
+        }
+    },
+    "Parameters": {
+        "RepoName": {
+            "Description": "Name of the ECR repository to create",
+            "Type": "String"
+        }
+    },
+    "Resources": {
+        "Repository": {
+            "Properties": {
+                "RepositoryName": {
+                    "Ref": "RepoName"
+                }
+            },
+            "Type": "AWS::ECR::Repository"
+        }
+    }
+}

@@ -28,7 +28,7 @@ t = Template()
 
 t.add_version("2010-09-09")
 
-t.add_description("Effective DevOps in AWS: AWS WAF against common attacks")
+t.set_description("Effective DevOps in AWS: AWS WAF against common attacks")
 
 t.add_parameter(Parameter(
     "WebACLName",

@@ -24,7 +24,7 @@ t = Template()
 
 PublicCidrIp = str(ip_network(get_ip()))
 
-t.add_description('Effective DevOps in AWS: Elasticsearch')
+t.set_description('Effective DevOps in AWS: Elasticsearch')
 
 t.add_parameter(Parameter(
     "InstanceType",
@@ -116,4 +116,4 @@ t.add_output(Output(
     ])
 ))
 
-print t.to_json()
+print(t.to_json())

@@ -32,7 +32,7 @@ from troposphere.cloudwatch import (
 
 t = Template()
 
-t.add_description("Effective DevOps in AWS: ALB for the ECS Cluster")
+t.set_description("Effective DevOps in AWS: ALB for the ECS Cluster")
 
 t.add_resource(Bucket(
     "S3Bucket",

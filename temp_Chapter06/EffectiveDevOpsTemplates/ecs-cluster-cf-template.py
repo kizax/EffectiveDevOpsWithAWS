@@ -38,7 +38,7 @@ PublicCidrIp = str(ip_network(get_ip()))
 
 t = Template()
 
-t.add_description("Effective DevOps in AWS: ECS Cluster")
+t.set_description("Effective DevOps in AWS: ECS Cluster")
 
 t.add_parameter(Parameter(
     "KeyPair",

@@ -12,7 +12,7 @@ from troposphere import (
 
 t = Template()
 
-t.add_description("Effective DevOps in AWS: SoftEtherVPN Server")
+t.set_description("Effective DevOps in AWS: SoftEtherVPN Server")
 
 t.add_parameter(Parameter(
     "KeyPair",
@@ -104,4 +104,4 @@ t.add_output(Output(
     Value=Ref("server")
 ))
 
-print t.to_json()
+print(t.to_json())

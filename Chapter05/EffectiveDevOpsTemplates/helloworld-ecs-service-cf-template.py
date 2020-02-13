@@ -29,7 +29,7 @@ from awacs.sts import AssumeRole
 
 t = Template()
 
-t.add_description("Effective DevOps in AWS: ECS service - Helloworld")
+t.set_description("Effective DevOps in AWS: ECS service - Helloworld")
 
 t.add_parameter(Parameter(
     "Tag",

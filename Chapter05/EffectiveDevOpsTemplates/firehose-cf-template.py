@@ -23,7 +23,7 @@ from troposphere.s3 import Bucket
 
 t = Template()
 
-t.add_description('Effective DevOps in AWS: Kinesis Firehose Stream')
+t.set_description('Effective DevOps in AWS: Kinesis Firehose Stream')
 
 
 t.add_resource(Bucket(
@@ -79,4 +79,4 @@ t.add_resource(DeliveryStream(
     )
 ))
 
-print t.to_json()
+print(t.to_json())
