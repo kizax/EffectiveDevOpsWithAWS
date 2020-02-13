@@ -34,26 +34,6 @@ t.add_resource(Bucket(
     DeletionPolicy="Retain",
 ))
 
-t.add_resource(BucketPolicy(
-    'BucketPolicy',
-    Bucket=Ref("S3Bucket"),
-    PolicyDocument=Policy(
-        Version='2012-10-17',
-        Statement=[
-            Statement(
-                Action=[PutObject],
-                Effect=Allow,
-                Principal=Principal("AWS", ["127311923021"]),
-                Resource=[Join('',
-                               [ARN(''),
-                                Ref("S3Bucket"),
-                                   "/AWSLogs/511912822958/*"])],
-            )
-        ]
-    )
-))
-
-
 t.add_resource(ec2.SecurityGroup(
     "LoadBalancerSecurityGroup",
     GroupDescription="Web load balancer security group.",

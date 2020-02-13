@@ -115,7 +115,7 @@
                 "IamInstanceProfile": {
                     "Ref": "EC2InstanceProfile"
                 },
-                "ImageId": "ami-04351e12",
+                "ImageId": "ami-a0cfeed8",
                 "InstanceType": "t2.micro",
                 "KeyName": {
                     "Ref": "KeyPair"

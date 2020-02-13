@@ -32,44 +32,6 @@
         }
     },
     "Resources": {
-        "BucketPolicy": {
-            "Properties": {
-                "Bucket": {
-                    "Ref": "S3Bucket"
-                },
-                "PolicyDocument": {
-                    "Statement": [
-                        {
-                            "Action": [
-                                "s3:PutObject"
-                            ],
-                            "Effect": "Allow",
-                            "Principal": {
-                                "AWS": [
-                                    "127311923021"
-                                ]
-                            },
-                            "Resource": [
-                                {
-                                    "Fn::Join": [
-                                        "",
-                                        [
-                                            "arn:aws:s3:::",
-                                            {
-                                                "Ref": "S3Bucket"
-                                            },
-                                            "/AWSLogs/511912822958/*"
-                                        ]
-                                    ]
-                                }
-                            ]
-                        }
-                    ],
-                    "Version": "2012-10-17"
-                }
-            },
-            "Type": "AWS::S3::BucketPolicy"
-        },
         "Listener": {
             "Properties": {
                 "DefaultActions": [
