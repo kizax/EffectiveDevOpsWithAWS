@@ -87,6 +87,7 @@ phases:
       - echo $REPOSITORY_NAME
       - pwd
       - cd /tmp
+      - ls -al
       - aws ecr put-image --repository-name $REPOSITORY_NAME --image-tag latest --image-manifest file://latest_manifest.json
 artifacts:
   files: /tmp/build.json
