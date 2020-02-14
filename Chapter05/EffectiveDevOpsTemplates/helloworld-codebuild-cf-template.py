@@ -63,6 +63,7 @@ environment = Environment(
                 "/",
                 "helloworld"])},
     ],
+    PrivilegedMode=True,
 )
 
 buildspec = """version: 0.1
@@ -75,7 +76,6 @@ phases:
       - printf '{"tag":"%s"}' "$(cat /tmp/tag.txt)" > /tmp/build.json
       - $(aws ecr get-login --no-include-email)
       - echo $(docker -v)
-      - cat /tmp/build_tag.txt
   build:
     commands:
       - docker build -t "$(cat /tmp/build_tag.txt)" .
