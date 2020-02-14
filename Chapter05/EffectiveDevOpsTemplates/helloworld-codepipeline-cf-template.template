@@ -140,7 +140,7 @@
                                         ]
                                     },
                                     "StackName": "helloworld-ecs-staging-service",
-                                    "TemplatePath": "App::templates/helloworld-ecs-service-cf.template"
+                                    "TemplatePath": "App::templates/helloworld-ecs-service-cf-template.template"
                                 },
                                 "InputArtifacts": [
                                     {

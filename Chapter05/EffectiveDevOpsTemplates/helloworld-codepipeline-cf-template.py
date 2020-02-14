@@ -172,7 +172,7 @@ t.add_resource(Pipeline(
                         "ActionMode": "CREATE_UPDATE",
                         "StackName": "helloworld-ecs-staging-service",
                         "Capabilities": "CAPABILITY_NAMED_IAM",
-                        "TemplatePath": "App::templates/helloworld-ecs-service-cf.template",
+                        "TemplatePath": "App::templates/helloworld-ecs-service-cf-template.template",
                         "RoleArn": GetAtt("CloudFormationHelloworldRole", "Arn"),
                         "ParameterOverrides": """{"Tag" : { "Fn::GetParam" : [ "BuildOutput", "build.json", "tag" ] } }"""
                     },
