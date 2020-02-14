@@ -89,14 +89,6 @@ artifacts:
   discard-paths: yes
 """
 
-
-# client = boto3.client("sts", aws_access_key_id=access_key, aws_secret_access_key=secret_key)
-# account_id = client.get_caller_identity()["Account"]
-# account_id = Join("", [Ref("AWS::AccountId")])
-account_id = "********"
-buildspec = buildspec.replace("{ACCOUNT_ID}", account_id)
-
-
 t.add_resource(Project(
     "CodeBuild",
     Name='HelloWorldContainer',
