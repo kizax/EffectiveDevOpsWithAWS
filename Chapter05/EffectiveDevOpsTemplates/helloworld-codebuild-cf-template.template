@@ -1,0 +1,81 @@
+{
+    "Description": "Effective DevOps in AWS: CodeBuild - Helloworld container",
+    "Resources": {
+        "CodeBuild": {
+            "Properties": {
+                "Artifacts": {
+                    "Name": "output",
+                    "Type": "CODEPIPELINE"
+                },
+                "Environment": {
+                    "ComputeType": "BUILD_GENERAL1_SMALL",
+                    "EnvironmentVariables": [
+                        {
+                            "Name": "REPOSITORY_NAME",
+                            "Value": "helloworld"
+                        },
+                        {
+                            "Name": "REPOSITORY_URI",
+                            "Value": {
+                                "Fn::Join": [
+                                    "",
+                                    [
+                                        {
+                                            "Ref": "AWS::AccountId"
+                                        },
+                                        ".dkr.ecr.",
+                                        {
+                                            "Ref": "AWS::Region"
+                                        },
+                                        ".amazonaws.com",
+                                        "/",
+                                        "helloworld"
+                                    ]
+                                ]
+                            }
+                        }
+                    ],
+                    "Image": "aws/codebuild/standard:2.0",
+                    "Type": "LINUX_CONTAINER"
+                },
+                "Name": "HelloWorldContainer",
+                "ServiceRole": {
+                    "Ref": "ServiceRole"
+                },
+                "Source": {
+                    "BuildSpec": "version: 0.1\nphases:\n  pre_build:\n    commands:\n      - aws codepipeline get-pipeline-state --name \"${CODEBUILD_INITIATOR##*/}\" --query stageStates[?actionStates[0].latestExecution.externalExecutionId==\\`$CODEBUILD_BUILD_ID\\`].latestExecution.pipelineExecutionId --output=text > /tmp/execution_id.txt\n      - aws codepipeline get-pipeline-execution --pipeline-name \"${CODEBUILD_INITIATOR##*/}\" --pipeline-execution-id $(cat /tmp/execution_id.txt) --query 'pipelineExecution.artifactRevisions[0].revisionId' --output=text > /tmp/tag.txt\n      - printf \"%s:%s\" \"$REPOSITORY_URI\" \"$(cat /tmp/tag.txt)\" > /tmp/build_tag.txt\n      - printf '{\"tag\":\"%s\"}' \"$(cat /tmp/tag.txt)\" > /tmp/build.json\n      - $(aws ecr get-login --no-include-email)\n      - echo $(docker -v)\n      - cat /tmp/build_tag.txt\n  build:\n    commands:\n      - docker build -t \"$(cat /tmp/build_tag.txt)\" .\n  post_build:\n    commands:\n      - docker push \"$(cat /tmp/build_tag.txt)\"\n      - aws ecr batch-get-image --repository-name $REPOSITORY_NAME --image-ids imageTag=\"$(cat /tmp/tag.txt)\" --query 'images[].imageManifest' --output text | tee /tmp/latest_manifest.json\n      - aws ecr put-image --repository-name $REPOSITORY_NAME --image-tag latest --image-manifest $(cat /tmp/latest_manifest.json)\nartifacts:\n  files: /tmp/build.json\n  discard-paths: yes\n",
+                    "Type": "CODEPIPELINE"
+                }
+            },
+            "Type": "AWS::CodeBuild::Project"
+        },
+        "ServiceRole": {
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "codebuild.amazonaws.com"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "ManagedPolicyArns": [
+                    "arn:aws:iam::aws:policy/AWSCodePipelineReadOnlyAccess",
+                    "arn:aws:iam::aws:policy/AWSCodeBuildDeveloperAccess",
+                    "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser",
+                    "arn:aws:iam::aws:policy/AmazonS3FullAccess",
+                    "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
+                ],
+                "Path": "/"
+            },
+            "Type": "AWS::IAM::Role"
+        }
+    }
+}
