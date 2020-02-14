@@ -1,0 +1,288 @@
+{
+    "Description": "Effective DevOps in AWS: Helloworld Pipeline",
+    "Resources": {
+        "CloudFormationHelloworldRole": {
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "cloudformation.amazonaws.com"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": "cloudformation:*",
+                                    "Effect": "Allow",
+                                    "Resource": "*"
+                                },
+                                {
+                                    "Action": "ecr:*",
+                                    "Effect": "Allow",
+                                    "Resource": "*"
+                                },
+                                {
+                                    "Action": "ecs:*",
+                                    "Effect": "Allow",
+                                    "Resource": "*"
+                                },
+                                {
+                                    "Action": "iam:*",
+                                    "Effect": "Allow",
+                                    "Resource": "*"
+                                }
+                            ]
+                        },
+                        "PolicyName": "HelloworldCloudFormation"
+                    }
+                ],
+                "RoleName": "CloudFormationHelloworldRole"
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "HelloWorldPipeline": {
+            "Properties": {
+                "ArtifactStore": {
+                    "Location": {
+                        "Ref": "S3Bucket"
+                    },
+                    "Type": "S3"
+                },
+                "RoleArn": {
+                    "Fn::GetAtt": [
+                        "PipelineRole",
+                        "Arn"
+                    ]
+                },
+                "Stages": [
+                    {
+                        "Actions": [
+                            {
+                                "ActionTypeId": {
+                                    "Category": "Source",
+                                    "Owner": "ThirdParty",
+                                    "Provider": "GitHub",
+                                    "Version": "1"
+                                },
+                                "Configuration": {
+                                    "Branch": "ToBeConfiguredLater",
+                                    "OAuthToken": "ToBeConfiguredLater",
+                                    "Owner": "ToBeConfiguredLater",
+                                    "Repo": "ToBeConfiguredLater"
+                                },
+                                "Name": "Source",
+                                "OutputArtifacts": [
+                                    {
+                                        "Name": "App"
+                                    }
+                                ]
+                            }
+                        ],
+                        "Name": "Source"
+                    },
+                    {
+                        "Actions": [
+                            {
+                                "ActionTypeId": {
+                                    "Category": "Build",
+                                    "Owner": "AWS",
+                                    "Provider": "CodeBuild",
+                                    "Version": "1"
+                                },
+                                "Configuration": {
+                                    "ProjectName": "HelloWorldContainer"
+                                },
+                                "InputArtifacts": [
+                                    {
+                                        "Name": "App"
+                                    }
+                                ],
+                                "Name": "Container",
+                                "OutputArtifacts": [
+                                    {
+                                        "Name": "BuildOutput"
+                                    }
+                                ]
+                            }
+                        ],
+                        "Name": "Build"
+                    },
+                    {
+                        "Actions": [
+                            {
+                                "ActionTypeId": {
+                                    "Category": "Deploy",
+                                    "Owner": "AWS",
+                                    "Provider": "CloudFormation",
+                                    "Version": "1"
+                                },
+                                "Configuration": {
+                                    "ActionMode": "CREATE_UPDATE",
+                                    "Capabilities": "CAPABILITY_NAMED_IAM",
+                                    "ChangeSetName": "Deploy",
+                                    "ParameterOverrides": "{\"Tag\" : { \"Fn::GetParam\" : [ \"BuildOutput\", \"build.json\", \"tag\" ] } }",
+                                    "RoleArn": {
+                                        "Fn::GetAtt": [
+                                            "CloudFormationHelloworldRole",
+                                            "Arn"
+                                        ]
+                                    },
+                                    "StackName": "helloworld-ecs-staging-service",
+                                    "TemplatePath": "App::templates/helloworld-ecs-service-cf.template"
+                                },
+                                "InputArtifacts": [
+                                    {
+                                        "Name": "App"
+                                    },
+                                    {
+                                        "Name": "BuildOutput"
+                                    }
+                                ],
+                                "Name": "Deploy"
+                            }
+                        ],
+                        "Name": "Staging"
+                    },
+                    {
+                        "Actions": [
+                            {
+                                "ActionTypeId": {
+                                    "Category": "Approval",
+                                    "Owner": "AWS",
+                                    "Provider": "Manual",
+                                    "Version": "1"
+                                },
+                                "Configuration": {},
+                                "InputArtifacts": [],
+                                "Name": "Approval"
+                            }
+                        ],
+                        "Name": "Approval"
+                    },
+                    {
+                        "Actions": [
+                            {
+                                "ActionTypeId": {
+                                    "Category": "Deploy",
+                                    "Owner": "AWS",
+                                    "Provider": "CloudFormation",
+                                    "Version": "1"
+                                },
+                                "Configuration": {
+                                    "ActionMode": "CREATE_UPDATE",
+                                    "Capabilities": "CAPABILITY_NAMED_IAM",
+                                    "ChangeSetName": "Deploy",
+                                    "ParameterOverrides": "{\"Tag\" : { \"Fn::GetParam\" : [ \"BuildOutput\", \"build.json\", \"tag\" ] } }",
+                                    "RoleArn": {
+                                        "Fn::GetAtt": [
+                                            "CloudFormationHelloworldRole",
+                                            "Arn"
+                                        ]
+                                    },
+                                    "StackName": "helloworld-ecs-production-service",
+                                    "TemplatePath": "App::templates/helloworld-ecs-service-cf-template.template"
+                                },
+                                "InputArtifacts": [
+                                    {
+                                        "Name": "App"
+                                    },
+                                    {
+                                        "Name": "BuildOutput"
+                                    }
+                                ],
+                                "Name": "Deploy"
+                            }
+                        ],
+                        "Name": "Production"
+                    }
+                ]
+            },
+            "Type": "AWS::CodePipeline::Pipeline"
+        },
+        "PipelineRole": {
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "codepipeline.amazonaws.com"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": "cloudformation:*",
+                                    "Effect": "Allow",
+                                    "Resource": "*"
+                                },
+                                {
+                                    "Action": "codebuild:*",
+                                    "Effect": "Allow",
+                                    "Resource": "*"
+                                },
+                                {
+                                    "Action": "codepipeline:*",
+                                    "Effect": "Allow",
+                                    "Resource": "*"
+                                },
+                                {
+                                    "Action": "ecr:*",
+                                    "Effect": "Allow",
+                                    "Resource": "*"
+                                },
+                                {
+                                    "Action": "ecs:*",
+                                    "Effect": "Allow",
+                                    "Resource": "*"
+                                },
+                                {
+                                    "Action": "iam:*",
+                                    "Effect": "Allow",
+                                    "Resource": "*"
+                                },
+                                {
+                                    "Action": "s3:*",
+                                    "Effect": "Allow",
+                                    "Resource": "*"
+                                }
+                            ]
+                        },
+                        "PolicyName": "HelloworldCodePipeline"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "S3Bucket": {
+            "Properties": {
+                "VersioningConfiguration": {
+                    "Status": "Enabled"
+                }
+            },
+            "Type": "AWS::S3::Bucket"
+        }
+    }
+}
