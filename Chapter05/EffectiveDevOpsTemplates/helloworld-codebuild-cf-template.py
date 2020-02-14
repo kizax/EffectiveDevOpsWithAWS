@@ -83,6 +83,8 @@ phases:
     commands:
       - docker push "$(cat /tmp/build_tag.txt)"
       - aws ecr batch-get-image --repository-name $REPOSITORY_NAME --image-ids imageTag="$(cat /tmp/tag.txt)" --query 'images[].imageManifest' --output text | tee /tmp/latest_manifest.json
+      - cat /tmp/latest_manifest.json
+      - echo $REPOSITORY_NAME
       - aws ecr put-image --repository-name $REPOSITORY_NAME --image-tag latest --image-manifest $(cat /tmp/latest_manifest.json)
 artifacts:
   files: /tmp/build.json
