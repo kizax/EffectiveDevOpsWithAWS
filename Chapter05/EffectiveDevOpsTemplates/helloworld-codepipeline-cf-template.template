@@ -139,7 +139,7 @@
                                             "Arn"
                                         ]
                                     },
-                                    "StackName": "helloworld-ecs-staging-service",
+                                    "StackName": "staging-helloworld-ecs-service",
                                     "TemplatePath": "App::templates/helloworld-ecs-service-cf-template.template"
                                 },
                                 "InputArtifacts": [
@@ -191,7 +191,7 @@
                                             "Arn"
                                         ]
                                     },
-                                    "StackName": "helloworld-ecs-production-service",
+                                    "StackName": "production-helloworld-ecs-service",
                                     "TemplatePath": "App::templates/helloworld-ecs-service-cf-template.template"
                                 },
                                 "InputArtifacts": [
