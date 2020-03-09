@@ -116,7 +116,7 @@
                     "Ref": "EC2InstanceProfile"
                 },
                 "ImageId": "ami-00166aa2554456d3e",
-                "InstanceType": "t2.micro",
+                "InstanceType": "t2.nano",
                 "KeyName": {
                     "Ref": "KeyPair"
                 },

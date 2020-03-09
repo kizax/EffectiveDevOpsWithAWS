@@ -25,39 +25,9 @@ from troposphere.s3 import (
     BucketPolicy,
 )
 
-from troposphere.cloudwatch import (
-    Alarm,
-    MetricDimension,
-)
-
 t = Template()
 
 t.set_description("Effective DevOps in AWS: ALB for the ECS Cluster")
-
-t.add_resource(Bucket(
-    "S3Bucket",
-    DeletionPolicy="Retain",
-))
-
-t.add_resource(BucketPolicy(
-    'BucketPolicy',
-    Bucket=Ref("S3Bucket"),
-    PolicyDocument=Policy(
-        Version='2012-10-17',
-        Statement=[
-            Statement(
-                Action=[PutObject],
-                Effect=Allow,
-                Principal=Principal("AWS", ["127311923021"]),
-                Resource=[Join('',
-                               [ARN(''),
-                                Ref("S3Bucket"),
-                                   "/AWSLogs/511912822958/*"])],
-            )
-        ]
-    )
-))
-
 
 t.add_resource(ec2.SecurityGroup(
     "LoadBalancerSecurityGroup",
@@ -92,16 +62,6 @@ t.add_resource(elb.LoadBalancer(
         )
     ),
     SecurityGroups=[Ref("LoadBalancerSecurityGroup")],
-    LoadBalancerAttributes=[
-        elb.LoadBalancerAttributes(
-            Key="access_logs.s3.enabled",
-            Value="true",
-        ),
-        elb.LoadBalancerAttributes(
-            Key="access_logs.s3.bucket",
-            Value=Ref("S3Bucket"),
-        )
-    ],
 ))
 
 t.add_resource(elb.TargetGroup(
@@ -149,46 +109,4 @@ t.add_output(Output(
     Value=Join("", ["http://", GetAtt("LoadBalancer", "DNSName"), ":3000"])
 ))
 
-
-t.add_resource(Alarm(
-    "ELBHTTP5xxs",
-    AlarmDescription="Alarm if HTTP 5xxs too high",
-    Namespace="AWS/ELB",
-    MetricName="HTTPCode_Backend_5XX",
-    Dimensions=[
-        MetricDimension(
-            Name="LoadBalancerName",
-            Value=Ref("LoadBalancer")
-        ),
-    ],
-    Statistic="Average",
-    Period="60",
-    EvaluationPeriods="3",
-    Threshold="30",
-    ComparisonOperator="GreaterThanOrEqualToThreshold",
-    AlarmActions=["arn:aws:sns:us-east-1:511912822958:alert-sms"],
-    OKActions=["arn:aws:sns:us-east-1:511912822958:alert-sms"],
-    InsufficientDataActions=[],
-))
-
-t.add_resource(Alarm(
-    "ELBHLatency",
-    AlarmDescription="Alarm if Latency too high",
-    Namespace="AWS/ELB",
-    MetricName="Latency",
-    Dimensions=[
-        MetricDimension(
-            Name="LoadBalancerName",
-            Value=Ref("LoadBalancer")
-        ),
-    ],
-    Statistic="Average",
-    Period="60",
-    EvaluationPeriods="5",
-    Threshold="0.5",
-    ComparisonOperator="GreaterThanOrEqualToThreshold",
-    AlarmActions=["arn:aws:sns:us-east-1:511912822958:alert-sms"],
-    OKActions=["arn:aws:sns:us-east-1:511912822958:alert-sms"],
-    InsufficientDataActions=[],
-))
 print(t.to_json())
